@@ -1,0 +1,1053 @@
+<title>Packet Playground</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticker-style chip nav → six lessons, each = funny story + live lab + exam check */
+:root{
+  --page:#F1F7FE; --bg:#EAF3FD; --paper:#FFFFFF; --ink:#13243B; --muted:#5B6E86; --line:#D6E4F3; --edge:#13243B;
+  --blue:#2B8CEB; --sun:#FFB547; --pink:#F2557A; --mint:#16A57A; --violet:#6C7CF5;
+  --blue-soft:#DCEEFF; --sun-soft:#FFF3DF; --pink-soft:#FFE6EC; --mint-soft:#DDF6EC;
+  --on-bright:#FFFFFF; color-scheme:light;
+  --shadow:0 1px 2px rgba(19,36,59,.06),0 8px 24px rgba(43,140,235,.10);
+  --display:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+
+*{box-sizing:border-box}
+body{background:var(--page);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--page)}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 72px}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+.mono{font-family:var(--mono);font-size:.88em}
+.ar{direction:rtl;text-align:right;font-family:var(--body);color:var(--muted)}
+p{margin:0}
+
+/* hero */
+.hero{display:grid;gap:10px;padding-block:8px 18px}
+.hero h1{font-size:clamp(2.3rem,7vw,4rem);font-weight:800;letter-spacing:-.03em;background:linear-gradient(90deg,var(--ink),var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h1 .dot{display:inline-block;width:.42em;height:.42em;border-radius:50%;background:var(--blue);border:0;vertical-align:.12em;margin-inline:.08em;animation:hop 2.6s ease-in-out infinite}
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-.25em)}}
+.hero p{max-width:62ch;color:var(--muted);font-size:1.08rem}
+.hero .ar{font-size:1.05rem}
+
+/* tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--page);display:flex;gap:8px;overflow-x:auto;padding-block:10px 12px;margin-bottom:8px;scrollbar-width:thin}
+.tab{flex:0 0 auto;font-family:var(--display);font-weight:700;font-size:1rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:7px 15px;cursor:pointer;transition:background .15s;display:flex;gap:8px;align-items:center}
+.tab small{font-family:var(--mono);font-size:.7rem;color:var(--muted);font-weight:400}
+.tab[aria-selected="true"]{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 6px 16px rgba(43,140,235,.28)}
+.tab[aria-selected="true"] small{color:#DCEEFF}
+.tab:focus-visible,.btn:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+
+/* lesson */
+.lesson{display:grid;gap:22px}
+.lesson-head{display:grid;gap:4px}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);font-weight:600}
+.lesson-head h2{font-size:clamp(1.8rem,5vw,2.7rem);font-weight:800}
+.lesson-head .ar{font-size:1.05rem}
+.story{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.story > div{min-width:0}
+.tale{background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:16px;padding:18px 20px;display:grid;gap:10px}
+.tale h3{font-size:1.25rem}
+.tale p{max-width:65ch}
+.facts{display:grid;gap:8px;align-content:start;padding:4px 2px}
+.facts h3{font-size:1.1rem}
+.facts ul{margin:0;padding-left:20px;display:grid;gap:4px}
+.facts b{color:var(--blue)}
+.facts{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px 20px!important;box-shadow:var(--shadow)}
+
+.lab{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:22px;display:grid;gap:14px;min-width:0}
+.lab-title{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;justify-content:space-between}
+.lab-title h3{font-size:1.35rem}
+.lab-title span{color:var(--muted);font-size:.92rem}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font-family:var(--display);font-weight:700;font-size:.98rem;color:#fff;background:var(--blue);border:1px solid transparent;border-radius:999px;padding:8px 16px;box-shadow:var(--shadow);cursor:pointer;transition:transform .08s,box-shadow .08s}
+.btn:hover{transform:translateY(-1px)}.btn:active{transform:translateY(0)}
+.btn.blue{background:var(--blue-soft);color:var(--blue)}
+.btn.pink{background:var(--pink-soft);color:var(--ink)}
+.btn.plain{background:var(--paper);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+label.field{display:flex;gap:8px;align-items:center;font-size:.92rem;color:var(--muted)}
+input[type=text],select{font-family:var(--mono);font-size:.95rem;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+input[type=range]{accent-color:var(--blue)}
+.note{font-size:.88rem;color:var(--muted)}
+.scroll-x{overflow-x:auto}
+
+/* exam checks */
+.exam{display:grid;gap:8px}
+.exam h3{font-size:1.15rem}
+details{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+details[open]{border-style:solid;border-color:var(--mint)}
+summary{cursor:pointer;font-weight:600}
+details p{margin-top:8px;max-width:70ch}
+
+/* ===== MUX ===== */
+.mux-stage{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(64px,1.1fr) minmax(0,1fr);gap:10px;align-items:center}
+.host{display:grid;gap:8px;min-width:0}
+.host-name{font-family:var(--display);font-weight:700;line-height:1.2}
+.host-name .mono{color:var(--muted);font-weight:400}
+.app,.app-r{display:grid;grid-template-columns:auto 1fr;gap:0 8px;align-items:center;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:6px 10px;color:var(--ink);font:inherit;min-width:0}
+.app{cursor:pointer;background:var(--paper);border-color:var(--line);transition:background .15s,border-color .15s}.app:hover{border-color:var(--blue)}
+.app:hover{background:var(--blue-soft)}
+.app .ic,.app-r .ic{font-size:1.4rem;grid-row:span 2}
+.app b,.app-r b{font-size:.95rem;line-height:1.2}
+.app .mono,.app-r .mono{color:var(--muted);font-size:.72rem;overflow-wrap:anywhere}
+.app-r.hit{background:var(--mint-soft);border-color:var(--mint);animation:pop .4s}
+@keyframes pop{50%{transform:scale(1.07)}}
+.wire-col{display:flex;align-items:center;gap:4px}
+.wire{flex:1;height:6px;border-radius:3px;background:repeating-linear-gradient(90deg,var(--ink) 0 10px,transparent 10px 16px);opacity:.55}
+.badge{font-family:var(--mono);font-size:.62rem;font-weight:600;padding:4px 5px;border-radius:6px;border:0;background:var(--blue);color:#fff;writing-mode:vertical-rl;transform:rotate(180deg)}
+.pkt{position:absolute;transform:translate(-50%,-50%);z-index:3;pointer-events:none;font-family:var(--mono);font-size:.68rem;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid var(--blue);color:var(--ink);box-shadow:0 4px 10px rgba(43,140,235,.3);white-space:nowrap}
+.hdr{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:6px}
+.hdr div{background:var(--bg);border-radius:8px;padding:6px 10px;min-width:0}
+.hdr small{display:block;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.hdr .mono{overflow-wrap:anywhere}
+.hdr .key{background:var(--blue-soft);outline:2px solid var(--blue)}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:.92rem;min-height:3em}
+.log li{padding:4px 10px;border-radius:8px;background:var(--bg)}
+.log li:first-child{background:var(--mint-soft)}
+.log li.bad:first-child{background:var(--pink-soft)}
+
+/* ===== TCP/UDP ===== */
+.race{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px}
+.lane{display:grid;gap:8px;align-content:start;min-width:0}
+.lane h4{color:var(--blue);font-family:var(--display);font-size:1.15rem;margin:0}
+.lane .who{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.75rem;color:var(--muted);border-bottom:2px solid var(--line);padding-bottom:4px}
+.seq{display:grid;gap:5px;min-height:120px;max-height:440px;overflow-y:auto;padding-right:4px}
+.row{font-size:.85rem;padding:4px 10px;border-radius:8px;max-width:88%;animation:slide .25s ease-out}
+@keyframes slide{from{opacity:.2;transform:translateY(4px)}to{opacity:1;transform:none}}
+.row.r{justify-self:start;background:var(--blue-soft)}
+.row.r::after{content:"  ──▶";font-family:var(--mono);color:var(--blue)}
+.row.l{justify-self:end;background:var(--mint-soft)}
+.row.l::before{content:"◀──  ";font-family:var(--mono);color:var(--mint)}
+.row.x{justify-self:center;background:var(--pink-soft);border:2px dashed var(--pink)}
+.row.n{justify-self:center;max-width:100%;background:none;color:var(--muted);font-style:italic;padding:2px}
+.result{border-radius:10px;padding:8px 12px;font-weight:600;background:var(--bg)}
+.result.ok{background:var(--mint-soft)}
+.result.meh{background:var(--pink-soft)}
+.score{font-family:var(--mono);font-size:.85rem}
+.cmp{width:100%;border-collapse:collapse;font-size:.92rem;min-width:520px}
+.cmp th,.cmp td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp thead th{font-family:var(--display);font-size:1.02rem;border-bottom:2px solid var(--ink)}
+.cmp td:first-child{color:var(--muted);font-weight:600;white-space:nowrap}
+.game{display:grid;gap:8px}
+.scn{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;background:var(--bg);border-radius:12px;padding:8px 12px}
+.scn .q{flex:1 1 220px;min-width:0}
+.scn .why{flex-basis:100%;font-size:.88rem}
+.scn.right{background:var(--mint-soft)}
+.scn.wrong{background:var(--pink-soft)}
+.pick{display:flex;gap:6px}
+.pick button{font-family:var(--mono);font-weight:600;font-size:.82rem;border:1px solid var(--line);border-radius:8px;padding:4px 10px;background:var(--paper);color:var(--ink);cursor:pointer}
+
+/* ===== SUBNET ===== */
+.bits{display:flex;flex-wrap:wrap;gap:4px 10px;font-family:var(--mono);font-size:1rem}
+.octet{display:flex;gap:1px;align-items:center}
+.bit{width:1.15em;text-align:center;border-radius:3px}
+.bit.n{background:var(--blue-soft);color:var(--blue);font-weight:600}
+.bit.h{background:var(--sun-soft)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.out{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.out div{background:var(--bg);border-radius:10px;padding:8px 12px;min-width:0}
+.out small{display:block;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.out .mono{font-size:1rem;font-weight:600;overflow-wrap:anywhere}
+.err{color:var(--pink);font-weight:600}
+.pizza{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:620px){.pizza{grid-template-columns:1fr}.pizza svg{max-width:240px;justify-self:center}}
+.pizza svg{width:100%;height:auto}
+.slices{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:300px;overflow-y:auto;font-size:.85rem}
+.slices li{display:grid;grid-template-columns:2.2em 1fr;gap:6px;padding:4px 8px;border-radius:8px;background:var(--bg)}
+.slices li b{font-family:var(--display)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{font-family:var(--display);font-weight:700;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 13px 1px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* ===== NAT ===== */
+.nat-map{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:center}
+@media (max-width:620px){.nat-map{grid-template-columns:1fr}}
+.zone{border:2px dashed var(--line);border-radius:14px;padding:10px;display:grid;gap:8px;min-width:0}
+.zone h4{margin:0;font-family:var(--display);font-size:1rem}
+.zone h4 small{font-family:var(--mono);font-weight:400;color:var(--muted);font-size:.7rem;display:block}
+.dev{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--bg);border-radius:10px;padding:6px 10px}
+.dev span{font-size:.9rem}
+.router{background:var(--blue-soft);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center;display:grid;gap:4px}
+.router b{font-family:var(--display);font-size:1.1rem}
+.router .mono{font-size:.75rem}
+.steps4{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:8px}
+.st{background:var(--bg);border-radius:12px;padding:10px 12px;display:grid;gap:4px;min-width:0;opacity:.35;transition:opacity .3s}
+.st.on{opacity:1}
+.st.drop{background:var(--pink-soft)}
+.st .lbl{font-family:var(--display);font-weight:700;font-size:.95rem}
+.st .mono{font-size:.8rem;overflow-wrap:anywhere}
+.chg{background:var(--sun);color:var(--ink);border-radius:4px;padding:0 3px}
+.nat-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.82rem;min-width:520px}
+.nat-table th{font-family:var(--body);text-align:left;font-size:.78rem;color:var(--muted);border-bottom:2px solid var(--ink);padding:6px 8px}
+.nat-table td{padding:6px 8px;border-bottom:1px solid var(--line)}
+.nat-table tr.new td{background:var(--sun-soft)}
+.nat-table tr.used td{background:var(--mint-soft)}
+
+/* ===== GRAPHS ===== */
+.graph-wrap{overflow-x:auto}
+.graph{width:100%;min-width:520px;height:auto;display:block}
+.e line,.e path{stroke:var(--line);stroke-width:3;fill:none}
+.e.relaxed line,.e.relaxed path{stroke:var(--blue);stroke-width:5}
+.e.tree line,.e.tree path{stroke:var(--mint);stroke-width:4}
+.e.path line,.e.path path{stroke:var(--sun);stroke-width:8}
+.e.cur path{stroke:var(--pink);stroke-width:5}
+.e.cur.better path{stroke:var(--blue)}
+.e rect{fill:var(--paper);stroke:var(--line);stroke-width:1.5}
+.e text{fill:var(--ink);font-family:var(--mono);font-size:14px;font-weight:600;text-anchor:middle;dominant-baseline:central}
+.e.neg text{fill:var(--pink)}
+.e.jam rect{fill:var(--pink-soft);stroke:var(--pink)}
+.arrowhead{fill:var(--line)}
+.n circle{fill:var(--paper);stroke:var(--blue);stroke-width:3}
+.n.visited circle{fill:var(--mint-soft);stroke:var(--mint)}
+.n.cur circle{fill:var(--pink-soft);stroke:var(--pink);stroke-width:4}
+.n.src circle{stroke-width:5}
+.n .emo{font-size:20px;text-anchor:middle;dominant-baseline:central}
+.n .lettr{font-family:var(--display);font-weight:800;font-size:22px;text-anchor:middle;dominant-baseline:central;fill:var(--ink)}
+.n .nm{font-family:var(--body);font-size:13px;font-weight:600;text-anchor:middle;fill:var(--muted)}
+.n .db rect{fill:var(--blue)}
+.n .db text{fill:#fff;font-family:var(--mono);font-size:13px;font-weight:600;text-anchor:middle;dominant-baseline:central}
+.n.changed .db rect{fill:var(--pink)}
+.split{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:760px){.split{grid-template-columns:1fr}}
+.dt{width:100%;border-collapse:collapse;font-size:.88rem}
+.dt th{text-align:left;font-size:.75rem;color:var(--muted);border-bottom:2px solid var(--ink);padding:5px 8px}
+.dt td{padding:5px 8px;border-bottom:1px solid var(--line);font-family:var(--mono);font-variant-numeric:tabular-nums}
+.dt tr.cur td{background:var(--pink-soft)}
+.dt tr.vis td:first-child::after{content:" ✓";color:var(--mint)}
+.dt tr.chg td{background:var(--blue-soft)}
+.msg{background:var(--blue-soft);border-radius:10px;padding:10px 14px;min-height:3.2em;font-size:.95rem}
+.msg.alarm{background:var(--pink-soft);font-weight:600}
+.edges{display:flex;flex-wrap:wrap;gap:5px}
+.edges span{font-family:var(--mono);font-size:.75rem;padding:2px 7px;border-radius:6px;background:var(--bg);border:1.5px solid var(--line)}
+.edges span.cur{background:var(--pink-soft);border-color:var(--pink)}
+.edges span.cur.better{background:var(--blue-soft);border-color:var(--blue)}
+.round{font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.toggle{display:flex;gap:8px;align-items:center;font-size:.92rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <h1>Packet Playground<span class="dot" aria-hidden="true"></span></h1>
+    <p>Six networking ideas, explained with nosy building guards, polite couriers, pizza slices, office receptionists and traffic jams. Read the story, then break things in the lab.</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Topics">
+    <button class="tab" role="tab" data-tab="mux">Mux / Demux <small>L4</small></button>
+    <button class="tab" role="tab" data-tab="tcp">TCP vs UDP <small>L4</small></button>
+    <button class="tab" role="tab" data-tab="subnet">Subnetting <small>L3</small></button>
+    <button class="tab" role="tab" data-tab="nat">NAT <small>L3</small></button>
+    <button class="tab" role="tab" data-tab="dijkstra">Dijkstra <small>routing</small></button>
+    <button class="tab" role="tab" data-tab="bellman">Bellman-Ford <small>routing</small></button>
+  </nav>
+
+  <main id="lessons">
+
+  <!-- ================= MUX ================= -->
+  <section class="lesson" id="mux">
+    <div class="lesson-head">
+      <span class="eyebrow">Transport layer · ports</span>
+      <h2>Multiplexing &amp; Demultiplexing</h2>
+    </div>
+    <div class="story">
+      <div class="tale">
+        <h3>The apartment building and Abu Saleh the guard</h3>
+        <p>Your phone is one apartment building. It has one street address: the <b>IP address</b>. Inside live many tenants: WhatsApp, a game, Spotify. Each tenant has a flat number: the <b>port</b>.</p>
+        <p><b>Multiplexing</b> is Abu Saleh collecting letters from every flat, writing "from flat 51001, to flat 5222" on each envelope, and throwing them all into <i>one</i> delivery van.</p>
+        <p><b>Demultiplexing</b> is the guard at the other building reading the flat number and knocking on the right door. If nobody lives in flat 9999, the letter goes in the bin.</p>
+      </div>
+      <div class="facts">
+        <h3>What you must remember</h3>
+        <ul>
+          <li>Mux happens at the <b>sender</b>, demux at the <b>receiver</b>.</li>
+          <li>The transport header carries <b>source port</b> and <b>destination port</b> (16 bits each, 0–65535).</li>
+          <li><b>UDP</b> demux uses a 2-tuple: (dst IP, dst port). Two different senders to the same port land in the same socket.</li>
+          <li><b>TCP</b> demux uses a 4-tuple: (src IP, src port, dst IP, dst port). A web server on port 443 has a separate socket for each client.</li>
+          <li>Well-known ports 0–1023 (53 DNS, 80 HTTP, 443 HTTPS). Your apps usually get random high "ephemeral" ports.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-title"><h3>Live lab: one wire, many apps</h3><span>Tap an app on Sara's phone to send a segment.</span></div>
+      <div class="mux-stage" id="muxStage">
+        <div class="host">
+          <div class="host-name">Sara's phone<br><span class="mono">10.0.0.5</span></div>
+          <button class="app" data-app="chat"><span class="ic">💬</span><b>Chat</b><span class="mono">src port 51001</span></button>
+          <button class="app" data-app="game"><span class="ic">🎮</span><b>Game</b><span class="mono">src port 51002</span></button>
+          <button class="app" data-app="music"><span class="ic">🎵</span><b>Music</b><span class="mono">src port 51003</span></button>
+          <button class="app" data-app="lost" id="muxGhost"><span class="ic">👻</span><b>Mystery</b><span class="mono">→ port 9999</span></button>
+        </div>
+        <div class="wire-col" aria-hidden="true">
+          <span class="badge" id="muxPoint">MUX</span><div class="wire"></div><span class="badge" id="demuxPoint">DEMUX</span>
+        </div>
+        <div class="host">
+          <div class="host-name">Server<br><span class="mono">10.0.0.9</span></div>
+          <div class="app-r" data-port="5222"><span class="ic">💬</span><b>Chat server</b><span class="mono">listening :5222</span></div>
+          <div class="app-r" data-port="27015"><span class="ic">🎮</span><b>Game server</b><span class="mono">listening :27015</span></div>
+          <div class="app-r" data-port="443"><span class="ic">🎵</span><b>Music server</b><span class="mono">listening :443</span></div>
+          <div class="app-r" style="visibility:hidden"><span class="ic">.</span><b>.</b><span class="mono">.</span></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="muxBurst">Send a burst of 6 🚀</button>
+        <span class="note">Watch different apps share the same wire, then get sorted by destination port.</span>
+      </div>
+      <div>
+        <p class="note" style="margin-bottom:6px">Last segment's header (the highlighted field is what demux reads):</p>
+        <div class="hdr" id="muxHdr">
+          <div><small>Src IP</small><span class="mono">—</span></div>
+          <div><small>Dst IP</small><span class="mono">—</span></div>
+          <div><small>Protocol</small><span class="mono">—</span></div>
+          <div><small>Src port</small><span class="mono">—</span></div>
+          <div class="key"><small>Dst port</small><span class="mono">—</span></div>
+          <div><small>Data</small><span class="mono">—</span></div>
+        </div>
+      </div>
+      <ul class="log" id="muxLog"><li>Waiting for Sara to send something…</li></ul>
+    </div>
+
+    <div class="exam">
+      <h3>Exam check</h3>
+      <details><summary>Two clients send UDP to the same server port 53. How many sockets receive them?</summary><p>One. UDP demux only looks at (dst IP, dst port), so both datagrams go to the same socket. The app tells them apart by reading the source IP/port.</p></details>
+      <details><summary>Two browsers connect to the same web server on port 443. How many sockets on the server?</summary><p>Two (plus the listening socket). TCP demux uses the full 4-tuple, and the source IP/port differ, so each connection gets its own socket.</p></details>
+      <details><summary>Where does mux happen, and what gets added?</summary><p>At the sender's transport layer. It gathers data from many sockets and adds a header with source and destination port numbers before passing segments to the network layer.</p></details>
+    </div>
+  </section>
+
+  <!-- ================= TCP / UDP ================= -->
+  <section class="lesson" id="tcp" hidden>
+    <div class="lesson-head">
+      <span class="eyebrow">Transport layer · reliability</span>
+      <h2>TCP vs UDP</h2>
+    </div>
+    <div class="story">
+      <div class="tale">
+        <h3>The polite courier and the flyer guy</h3>
+        <p><b>TCP</b> is a registered-mail courier. He calls first ("Are you home?"), waits for "Yes!", says "OK coming." That's the <b>3-way handshake</b>. He numbers every box, waits for your signature, and if a box goes missing he drives back and brings it again. Slow, but your order arrives complete and in order.</p>
+        <p><b>UDP</b> is a guy throwing flyers out of a car window. No call, no signature, no second trip. Super fast, tiny overhead. If a flyer lands in a puddle, nobody cares.</p>
+      </div>
+      <div class="facts">
+        <h3>What you must remember</h3>
+        <ul>
+          <li>TCP: <b>connection-oriented</b>, reliable, in-order byte stream, flow control + congestion control.</li>
+          <li>UDP: <b>connectionless</b>, best-effort, no ordering, no congestion control.</li>
+          <li>Header: TCP <b>20 bytes</b> minimum, UDP only <b>8 bytes</b>.</li>
+          <li>TCP reliability tools: sequence numbers, ACKs, timers, retransmission.</li>
+          <li>UDP still has a <b>checksum</b> to detect errors, but it doesn't fix them.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-title"><h3>Live lab: send "Please bring kabsa for dinner"</h3><span>Both send the same 5 words over the same bad network.</span></div>
+      <div class="controls">
+        <label class="field" for="lossR">Packet loss <input type="range" id="lossR" min="0" max="50" step="5" value="25"> <b id="lossV" class="mono">25%</b></label>
+        <button class="btn" id="raceGo">Send it! 📨</button>
+        <span class="score" id="raceScore"></span>
+      </div>
+      <div class="race">
+        <div class="lane">
+          <h4>TCP · the polite courier</h4>
+          <div class="who"><span>📱 Sara</span><span>Mom 📱</span></div>
+          <div class="seq" id="tcpSeq"><div class="row n">Press "Send it!" to start.</div></div>
+          <div class="result" id="tcpRes">Mom receives: …</div>
+        </div>
+        <div class="lane">
+          <h4>UDP · the flyer guy</h4>
+          <div class="who"><span>📱 Sara</span><span>Mom 📱</span></div>
+          <div class="seq" id="udpSeq"><div class="row n">Press "Send it!" to start.</div></div>
+          <div class="result" id="udpRes">Mom receives: …</div>
+        </div>
+      </div>
+      <p class="note">Simplified: TCP is shown as stop-and-wait (one segment, one ACK). Real TCP sends a whole window of segments before waiting.</p>
+    </div>
+
+    <div class="lab">
+      <div class="lab-title"><h3>Game: who would you hire?</h3><span id="gameScore">Score 0 / 0</span></div>
+      <div class="game" id="game"></div>
+    </div>
+
+    <div class="scroll-x">
+      <table class="cmp">
+        <thead><tr><th></th><th>TCP</th><th>UDP</th></tr></thead>
+        <tbody>
+          <tr><td>Connection</td><td>3-way handshake (SYN, SYN-ACK, ACK)</td><td>None, just send</td></tr>
+          <tr><td>Reliability</td><td>ACKs + retransmission</td><td>Best effort, may lose</td></tr>
+          <tr><td>Order</td><td>Guaranteed in-order</td><td>Can arrive shuffled</td></tr>
+          <tr><td>Header</td><td>20–60 bytes</td><td>8 bytes</td></tr>
+          <tr><td>Control</td><td>Flow + congestion control</td><td>None (app decides)</td></tr>
+          <tr><td>Data unit</td><td>Segment (byte stream)</td><td>Datagram (message)</td></tr>
+          <tr><td>Used by</td><td>HTTP/1.1, HTTP/2, SMTP, SSH, FTP</td><td>DNS, VoIP, gaming, streaming, QUIC/HTTP/3</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exam">
+      <h3>Exam check</h3>
+      <details><summary>Why does DNS usually use UDP?</summary><p>A query and answer are tiny and fit in one datagram. A TCP handshake would add a round trip before the question is even asked. If the reply is lost, the resolver simply asks again.</p></details>
+      <details><summary>If UDP is unreliable, how does HTTP/3 deliver web pages reliably?</summary><p>HTTP/3 runs on QUIC, which builds reliability, ordering and encryption in the application layer on top of UDP. UDP is just the fast envelope.</p></details>
+      <details><summary>Name three fields TCP has that UDP does not.</summary><p>Sequence number, acknowledgment number, and receive window (also flags like SYN/ACK/FIN). UDP has only source port, destination port, length, checksum.</p></details>
+    </div>
+  </section>
+
+  <!-- ================= SUBNET ================= -->
+  <section class="lesson" id="subnet" hidden>
+    <div class="lesson-head">
+      <span class="eyebrow">Network layer · IPv4 addressing</span>
+      <h2>Subnetting</h2>
+    </div>
+    <div class="story">
+      <div class="tale">
+        <h3>The family pizza problem</h3>
+        <p>An IP address is 32 bits split in two: the <b>network part</b> (which pizza) and the <b>host part</b> (which bite). The <b>/number</b> tells you how many bits belong to the network.</p>
+        <p>A /24 is one big pizza with 256 bites. HR, IT and Sales start fighting over it. Solution: <b>borrow host bits</b> to cut slices. Borrow 1 bit → 2 slices. Borrow 2 bits → 4 slices. Every bit you borrow doubles the slices and halves their size.</p>
+        <p>Each slice loses two bites you can't eat: the first (<b>network address</b>, the slice's name) and the last (<b>broadcast</b>, "shout to everyone in this slice").</p>
+      </div>
+      <div class="facts">
+        <h3>What you must remember</h3>
+        <ul>
+          <li>Usable hosts = <b>2<sup>(32−n)</sup> − 2</b></li>
+          <li>Number of subnets from borrowing <i>b</i> bits = <b>2<sup>b</sup></b></li>
+          <li>Network address = IP <b>AND</b> mask</li>
+          <li>Broadcast = network address with all host bits set to 1</li>
+          <li>Shortcut: <b>block size = 256 − mask octet</b>. Subnets start at multiples of the block.</li>
+          <li>/24 = 255.255.255.0 · /26 = .192 · /27 = .224 · /28 = .240 · /30 = .252</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-title"><h3>Live lab: subnet calculator</h3><span>Type any IP and drag the slider.</span></div>
+      <div class="controls">
+        <label class="field" for="snIp">IP <input type="text" id="snIp" value="192.168.10.77" size="15" spellcheck="false" autocomplete="off"></label>
+        <label class="field" for="snCidr">/ <input type="range" id="snCidr" min="8" max="30" value="26"> <b class="mono" id="snCidrV">/26</b></label>
+      </div>
+      <div id="snErr" class="err" hidden>That doesn't look like an IPv4 address. Use four numbers 0–255 separated by dots, like 10.1.2.3.</div>
+      <div class="scroll-x"><div class="bits" id="snBits"></div></div>
+      <div class="legend"><span><i style="background:var(--blue-soft);outline:2px solid var(--blue)"></i>network bits (which pizza)</span><span><i style="background:var(--sun-soft);outline:2px solid var(--sun)"></i>host bits (which bite)</span></div>
+      <div class="out" id="snOut"></div>
+      <p class="note" id="snMagic"></p>
+    </div>
+
+    <div class="lab">
+      <div class="lab-title"><h3>Live lab: slice the pizza</h3><span>192.168.10.0/24 cut into equal subnets</span></div>
+      <div class="seg" id="pizzaBtns" role="group" aria-label="Number of subnets"></div>
+      <div class="pizza">
+        <svg viewBox="0 0 220 220" id="pizzaSvg" role="img" aria-label="Pizza split into subnets"></svg>
+        <div style="min-width:0;display:grid;gap:8px">
+          <p id="pizzaSum" class="note"></p>
+          <ul class="slices" id="pizzaList"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="exam">
+      <h3>Exam check</h3>
+      <details><summary>How many usable hosts in a /27?</summary><p>2<sup>5</sup> − 2 = 30. (32 addresses, minus network and broadcast.)</p></details>
+      <details><summary>Find network & broadcast of 172.16.45.200/20.</summary><p>/20 mask = 255.255.240.0. Interesting octet is the 3rd, block = 256 − 240 = 16. 45 falls in the block starting at 32. Network = 172.16.32.0, broadcast = 172.16.47.255, hosts 172.16.32.1 – 172.16.47.254 (4094 usable). Type it in the calculator to check.</p></details>
+      <details><summary>You need 6 subnets from 192.168.1.0/24. What prefix?</summary><p>Borrow 3 bits (2<sup>3</sup> = 8 ≥ 6) → /27, giving 8 subnets of 30 usable hosts each.</p></details>
+    </div>
+  </section>
+
+  <!-- ================= NAT ================= -->
+  <section class="lesson" id="nat" hidden>
+    <div class="lesson-head">
+      <span class="eyebrow">Network layer · address translation</span>
+      <h2>NAT</h2>
+    </div>
+    <div class="story">
+      <div class="tale">
+        <h3>The company receptionist</h3>
+        <p>A company has <b>one public phone number</b> but 50 employees with internal extensions (private IPs like 192.168.x.x). When Ahmed calls a restaurant, the restaurant only sees the company number.</p>
+        <p>The receptionist (<b>the router</b>) writes in her notebook: "the call that went out on line 62001 belongs to Ahmed." When the restaurant calls back on line 62001, she checks the notebook and forwards it to Ahmed.</p>
+        <p>A random stranger calls asking for "extension 40000"? Not in the notebook. Hung up. That's why NAT also feels like a little firewall.</p>
+      </div>
+      <div class="facts">
+        <h3>What you must remember</h3>
+        <ul>
+          <li>Why NAT: IPv4 has only ~4.3 billion addresses. NAT lets a whole network share one public IP.</li>
+          <li>Private ranges (RFC 1918): <b>10.0.0.0/8</b>, <b>172.16.0.0/12</b>, <b>192.168.0.0/16</b>.</li>
+          <li>Outgoing: router replaces (private IP, port) with (public IP, new port) and saves the pair in the <b>NAT translation table</b>.</li>
+          <li>Incoming: router looks up the destination port in the table and rewrites back.</li>
+          <li>This port-based form is called <b>NAPT / PAT</b>.</li>
+          <li>Criticism: breaks the end-to-end principle; servers behind NAT need <b>port forwarding</b>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-title"><h3>Live lab: be the router</h3><span>Tap a device to open a website. Watch the router rewrite the envelope.</span></div>
+      <div class="nat-map">
+        <div class="zone">
+          <h4>🏠 Home network<small>private 192.168.1.0/24</small></h4>
+          <div class="dev"><span>📱 Phone <span class="mono">192.168.1.5</span></span><button class="btn blue" data-dev="0">Open site</button></div>
+          <div class="dev"><span>💻 Laptop <span class="mono">192.168.1.7</span></span><button class="btn blue" data-dev="1">Open site</button></div>
+          <div class="dev"><span>📺 TV <span class="mono">192.168.1.9</span></span><button class="btn blue" data-dev="2">Open site</button></div>
+        </div>
+        <div class="router">
+          <b>📒 Router (NAT)</b>
+          <span class="mono">inside 192.168.1.1</span>
+          <span class="mono">outside 203.0.113.7</span>
+        </div>
+        <div class="zone">
+          <h4>🌍 Internet<small>public addresses</small></h4>
+          <div class="dev"><span>🌐 Web server <span class="mono">198.51.100.20:443</span></span></div>
+          <div class="dev"><span>🕵️ Stranger</span><button class="btn pink" id="natStranger">Knock uninvited</button></div>
+        </div>
+      </div>
+      <div class="steps4" id="natSteps">
+        <div class="st"><span class="lbl">1 · Leaves the device</span><span class="mono">—</span></div>
+        <div class="st"><span class="lbl">2 · Router rewrites source</span><span class="mono">—</span></div>
+        <div class="st"><span class="lbl">3 · Reply arrives at router</span><span class="mono">—</span></div>
+        <div class="st"><span class="lbl">4 · Router rewrites destination</span><span class="mono">—</span></div>
+      </div>
+      <div>
+        <p class="note" style="margin-bottom:6px">NAT translation table (the receptionist's notebook)</p>
+        <div class="scroll-x">
+          <table class="nat-table">
+            <thead><tr><th>Inside (private IP:port)</th><th>Outside (public IP:port)</th><th>Talking to</th></tr></thead>
+            <tbody id="natTable"><tr><td colspan="3" style="color:var(--muted);font-family:var(--body)">Empty. Nobody has gone online yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <p class="note">203.0.113.x and 198.51.100.x are documentation-only example addresses.</p>
+    </div>
+
+    <div class="exam">
+      <h3>Exam check</h3>
+      <details><summary>Why can't an outside host start a connection to a laptop behind NAT?</summary><p>The router has no table entry for that public port, so it doesn't know which private host to forward to. It drops the packet. Fix: configure port forwarding (a static entry).</p></details>
+      <details><summary>Which header fields does NAPT change on an outgoing packet?</summary><p>Source IP and source port. It must then recompute the IP header checksum and the TCP/UDP checksum.</p></details>
+      <details><summary>Theoretical max simultaneous connections per public IP?</summary><p>About 60,000+ per protocol, because the port field is 16 bits (65,535 values) minus reserved ports.</p></details>
+    </div>
+  </section>
+
+  <!-- ================= DIJKSTRA ================= -->
+  <section class="lesson" id="dijkstra" hidden>
+    <div class="lesson-head">
+      <span class="eyebrow">Routing · link-state (OSPF)</span>
+      <h2>Dijkstra's algorithm</h2>
+    </div>
+    <div class="story">
+      <div class="tale">
+        <h3>The impatient GPS</h3>
+        <p>You're at home and want the fastest drive to the office. Dijkstra is a very organized GPS that knows the <b>whole map</b> (every road and its minutes).</p>
+        <p>Its rule: <b>always settle the closest place you haven't settled yet.</b> From there, check each road out: "Can I reach my neighbor faster through here?" If yes, update it. That's called <b>relaxing</b> an edge.</p>
+        <p>Once a place is settled, its time is final. Like water spreading from a spilled cup: the closest spots get wet first.</p>
+      </div>
+      <div class="facts">
+        <h3>What you must remember</h3>
+        <ul>
+          <li>Needs <b>global knowledge</b> of the topology → used in <b>link-state</b> routing (OSPF, IS-IS).</li>
+          <li>Works only with <b>non-negative</b> weights.</li>
+          <li>Complexity: O(V²) simple, <b>O((V+E) log V)</b> with a heap.</li>
+          <li>Output: shortest distance + previous hop for every node = the router's <b>forwarding table</b>.</li>
+          <li>Relax: if d(u) + w(u,v) &lt; d(v), set d(v) = d(u) + w(u,v), prev(v) = u.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-title"><h3>Live lab: drive across town</h3><span>Weights are minutes of driving.</span></div>
+      <div class="controls">
+        <label class="field" for="djSrc">From <select id="djSrc"></select></label>
+        <label class="field" for="djDst">To <select id="djDst"></select></label>
+        <button class="btn" id="djNext">Next step ▶</button>
+        <button class="btn plain" id="djAll">Run all ⏩</button>
+        <button class="btn plain" id="djReset">Restart</button>
+        <button class="btn pink" id="djJam">Traffic jam! 🚧</button>
+      </div>
+      <div class="msg" id="djMsg"></div>
+      <div class="split">
+        <div class="graph-wrap"><svg class="graph" id="djSvg" viewBox="0 0 640 340" role="img" aria-label="Road map graph"></svg></div>
+        <div style="min-width:0;display:grid;gap:8px">
+          <table class="dt"><thead><tr><th>Place</th><th>Best time</th><th>Came from</th></tr></thead><tbody id="djTable"></tbody></table>
+          <div class="legend"><span><i style="background:var(--pink-soft);outline:2px solid var(--pink)"></i>settling now</span><span><i style="background:var(--mint-soft);outline:2px solid var(--mint)"></i>settled</span><span><i style="background:var(--blue)"></i>just relaxed</span><span><i style="background:var(--sun)"></i>final path</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exam">
+      <h3>Exam check</h3>
+      <details><summary>Why does Dijkstra fail with negative weights?</summary><p>It treats a settled node as final. A negative edge discovered later could make a shorter path to an already-settled node, but Dijkstra never revisits it.</p></details>
+      <details><summary>What does a router do with Dijkstra's result?</summary><p>It follows the prev pointers back from each destination to find the first hop, and stores (destination → outgoing link) in its forwarding table.</p></details>
+      <details><summary>Link-state vs distance-vector in one line?</summary><p>Link-state: every router floods its links to everyone, then runs Dijkstra on the full map. Distance-vector: routers only tell neighbors their distance table and use Bellman-Ford.</p></details>
+    </div>
+  </section>
+
+  <!-- ================= BELLMAN-FORD ================= -->
+  <section class="lesson" id="bellman" hidden>
+    <div class="lesson-head">
+      <span class="eyebrow">Routing · distance-vector (RIP)</span>
+      <h2>Bellman-Ford</h2>
+    </div>
+    <div class="story">
+      <div class="tale">
+        <h3>The neighborhood gossip network</h3>
+        <p>Nobody has the full map. Each person only hears from neighbors: "I can reach the bakery for 5 riyals." You think: "My road to you costs 2, so I can reach it for 7. Better than my 9!" That's <b>relaxing</b> again, but done for <b>every road, every round</b>.</p>
+        <p>Some roads have <b>cashback coupons</b>, so their cost is negative. Dijkstra panics. Bellman-Ford shrugs and keeps relaxing.</p>
+        <p>After <b>V − 1 rounds</b> all prices are final. If a round <i>still</i> finds a cheaper price, there's a <b>money glitch</b>: a loop of roads that pays you every lap (a negative cycle). Bellman-Ford reports it.</p>
+      </div>
+      <div class="facts">
+        <h3>What you must remember</h3>
+        <ul>
+          <li>Relax <b>all edges</b>, repeat <b>V − 1</b> times. Why? A shortest path has at most V − 1 edges.</li>
+          <li>Handles <b>negative weights</b>; detects <b>negative cycles</b> with one extra round.</li>
+          <li>Complexity: <b>O(V·E)</b>, slower than Dijkstra.</li>
+          <li>Distributed version = <b>distance-vector routing</b> (RIP): d<sub>x</sub>(y) = min<sub>v</sub>{ c(x,v) + d<sub>v</sub>(y) }.</li>
+          <li>Weakness: <b>count-to-infinity</b> after a link breaks. RIP caps "infinity" at <b>16 hops</b>; poisoned reverse helps.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="lab">
+      <div class="lab-title"><h3>Live lab: cheapest trip with cashback roads</h3><span>Weights are riyals. Pink = cashback.</span></div>
+      <div class="controls">
+        <button class="btn" id="bfNext">Relax next edge ▶</button>
+        <button class="btn plain" id="bfRound">Finish round ⏭</button>
+        <button class="btn plain" id="bfAll">Run all ⏩</button>
+        <button class="btn plain" id="bfReset">Restart</button>
+        <label class="toggle" for="bfGlitch"><input type="checkbox" id="bfGlitch"> Add a money glitch (negative cycle) 💸</label>
+      </div>
+      <div class="round" id="bfRoundLbl"></div>
+      <div class="msg" id="bfMsg"></div>
+      <div class="split">
+        <div class="graph-wrap"><svg class="graph" id="bfSvg" viewBox="0 0 600 340" role="img" aria-label="Directed graph with negative edges"></svg></div>
+        <div style="min-width:0;display:grid;gap:10px">
+          <table class="dt"><thead><tr><th>Node</th><th>Cheapest</th><th>Came from</th></tr></thead><tbody id="bfTable"></tbody></table>
+          <div><p class="note" style="margin-bottom:4px">Edge order checked every round:</p><div class="edges" id="bfEdges"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-x">
+      <table class="cmp">
+        <thead><tr><th></th><th>Dijkstra</th><th>Bellman-Ford</th></tr></thead>
+        <tbody>
+          <tr><td>Strategy</td><td>Greedy: settle closest node</td><td>Relax every edge, V−1 times</td></tr>
+          <tr><td>Negative weights</td><td>No</td><td>Yes, and detects negative cycles</td></tr>
+          <tr><td>Complexity</td><td>O((V+E) log V)</td><td>O(V·E)</td></tr>
+          <tr><td>Knowledge</td><td>Whole map (global)</td><td>Only neighbors (local)</td></tr>
+          <tr><td>Routing family</td><td>Link-state: OSPF, IS-IS</td><td>Distance-vector: RIP</td></tr>
+          <tr><td>Analogy</td><td>GPS with the full map</td><td>Neighborhood gossip</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="exam">
+      <h3>Exam check</h3>
+      <details><summary>Why exactly V − 1 rounds?</summary><p>A shortest path without cycles visits each node at most once, so it has at most V − 1 edges. Each round guarantees at least one more edge of every shortest path is correct.</p></details>
+      <details><summary>How is a negative cycle detected?</summary><p>Run one more (V-th) round. If any edge can still be relaxed, distances keep falling forever, so a negative cycle is reachable from the source.</p></details>
+      <details><summary>What is count-to-infinity?</summary><p>In distance-vector routing, after a link fails, two routers keep believing each other's stale routes and increase the cost by 1 each exchange, slowly "counting" up. Fixes: max hop count (16 in RIP), split horizon, poisoned reverse.</p></details>
+    </div>
+  </section>
+  </main>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SVGNS='http://www.w3.org/2000/svg';
+function sv(tag,attrs={},parent){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+const fmt=d=>d===Infinity?'∞':d;
+
+/* ---------- tabs ---------- */
+const ids=['mux','tcp','subnet','nat','dijkstra','bellman'];
+function show(id){
+  $$('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.tab===id));
+  $$('.lesson').forEach(s=>s.hidden=s.id!==id);
+  try{localStorage.setItem('pp-tab',id)}catch(e){}
+}
+$$('.tab').forEach(t=>t.addEventListener('click',()=>{
+  show(t.dataset.tab);
+  const top=$('#lessons').getBoundingClientRect().top;
+  if(top<0)$('#lessons').scrollIntoView({block:'start'});
+}));
+let start=location.hash.slice(1);
+if(!ids.includes(start)){try{start=localStorage.getItem('pp-tab')}catch(e){start=null}}
+show(ids.includes(start)?start:'mux');
+
+/* ---------- MUX ---------- */
+const muxApps={
+  chat:{icon:'💬',name:'Chat',src:51001,dst:5222,proto:'TCP',data:'"where are you?? 😤"',color:'var(--blue-soft)'},
+  game:{icon:'🎮',name:'Game',src:51002,dst:27015,proto:'UDP',data:'"player jumped ↑"',color:'var(--mint-soft)'},
+  music:{icon:'🎵',name:'Music',src:51003,dst:443,proto:'TCP',data:'"skip this song pls"',color:'var(--sun)'},
+  lost:{icon:'👻',name:'Mystery',src:51004,dst:9999,proto:'UDP',data:'"is anybody home?"',color:'var(--pink-soft)'}
+};
+const muxStage=$('#muxStage');
+function rel(el,side){
+  const r=el.getBoundingClientRect(),s=muxStage.getBoundingClientRect();
+  const x=side==='r'?r.right-s.left:side==='l'?r.left-s.left:r.left-s.left+r.width/2;
+  return {x,y:r.top-s.top+r.height/2};
+}
+function muxLog(html,bad){
+  const li=document.createElement('li');li.innerHTML=html;if(bad)li.className='bad';
+  const ul=$('#muxLog');ul.prepend(li);while(ul.children.length>5)ul.lastChild.remove();
+}
+function sendMux(key){
+  const a=muxApps[key];
+  const srcEl=$(`.app[data-app="${key}"]`);
+  const target=$(`.app-r[data-port="${a.dst}"]`);
+  const vals=['10.0.0.5','10.0.0.9',a.proto,a.src,a.dst,a.data];
+  $$('#muxHdr .mono').forEach((m,i)=>m.textContent=vals[i]);
+  const p=document.createElement('div');p.className='pkt';p.textContent=':'+a.dst;p.style.background=a.color;
+  muxStage.appendChild(p);
+  const A=rel(srcEl,'r'),M=rel($('#muxPoint'),'c'),D=rel($('#demuxPoint'),'c');
+  const frames=[{left:A.x+'px',top:A.y+'px',offset:0},{left:M.x+'px',top:M.y+'px',offset:.28},{left:D.x+'px',top:D.y+'px',offset:.7}];
+  if(target){const T=rel(target,'l');frames.push({left:T.x+'px',top:T.y+'px',offset:1})}
+  else frames.push({left:D.x+'px',top:(D.y+60)+'px',opacity:0,offset:1});
+  const anim=p.animate(frames,{duration:reduce?300:1700,easing:'ease-in-out',fill:'forwards'});
+  anim.onfinish=()=>{
+    p.remove();
+    if(target){
+      target.classList.remove('hit');void target.offsetWidth;target.classList.add('hit');
+      setTimeout(()=>target.classList.remove('hit'),900);
+      muxLog(`📬 Demux read <b class="mono">dst port ${a.dst}</b> → handed to ${a.icon} ${a.name} server (${a.proto})`);
+    } else {
+      muxLog(`🚫 <b class="mono">dst port 9999</b>: nobody lives there. Dropped, and the OS replies "ICMP port unreachable".`,true);
+    }
+  };
+}
+$$('.app').forEach(b=>b.addEventListener('click',()=>sendMux(b.dataset.app)));
+$('#muxBurst').addEventListener('click',()=>{
+  const k=['chat','game','music'];
+  for(let i=0;i<6;i++)setTimeout(()=>sendMux(k[Math.floor(Math.random()*3)]),i*260);
+});
+
+/* ---------- TCP vs UDP ---------- */
+const WORDS=['Please','bring','kabsa','for','dinner'];
+$('#lossR').addEventListener('input',e=>$('#lossV').textContent=e.target.value+'%');
+let raceToken=0;
+function buildTCP(loss){
+  const s=[{c:'n',t:'📞 3-way handshake first'},
+    {c:'r',t:'SYN: "Hi Mom, can we talk?" (seq=100)'},
+    {c:'l',t:'SYN-ACK: "Yes habibti, go ahead" (ack=101)'},
+    {c:'r',t:'ACK: "Great, sending now"'}];
+  let wire=3;
+  WORDS.forEach((w,i)=>{
+    let tries=0;
+    while(Math.random()<loss&&tries<3){
+      s.push({c:'x',t:`#${i+1} "${w}" got lost 💥`});
+      s.push({c:'n',t:`⏰ timeout: no ACK for #${i+1}… resending`});
+      tries++;wire++;
+    }
+    s.push({c:'r',t:`#${i+1} "${w}"`});
+    s.push({c:'l',t:`ACK: "got #${i+1}, send #${i+2}"`});
+    wire+=2;
+  });
+  s.push({c:'n',t:'👋 closing: FIN → ACK → FIN → ACK'});wire+=4;
+  return {steps:s,wire,got:WORDS.slice()};
+}
+function buildUDP(loss){
+  const s=[{c:'n',t:'🚀 No handshake. Just… throw.'}];
+  let arrived=[];
+  WORDS.forEach((w,i)=>{
+    if(Math.random()<loss){s.push({c:'x',t:`#${i+1} "${w}" vanished. Nobody noticed 🤷`})}
+    else{s.push({c:'r',t:`#${i+1} "${w}"`});arrived.push(w)}
+  });
+  for(let i=0;i<arrived.length-1;i++){
+    if(Math.random()<0.3){[arrived[i],arrived[i+1]]=[arrived[i+1],arrived[i]];i++}
+  }
+  if(arrived.join()!==WORDS.filter(w=>arrived.includes(w)).join())s.push({c:'n',t:'🔀 some datagrams took different routes and arrived shuffled'});
+  return {steps:s,wire:WORDS.length,got:arrived};
+}
+function play(el,steps,tok,done){
+  el.innerHTML='';let i=0;
+  const tick=()=>{
+    if(tok!==raceToken)return;
+    if(i>=steps.length){done();return}
+    const d=document.createElement('div');d.className='row '+steps[i].c;d.textContent=steps[i].t;el.appendChild(d);
+    el.scrollTop=el.scrollHeight;i++;setTimeout(tick,reduce?40:380);
+  };tick();
+}
+$('#raceGo').addEventListener('click',()=>{
+  const loss=+$('#lossR').value/100,tok=++raceToken;
+  const T=buildTCP(loss),U=buildUDP(loss);
+  $('#tcpRes').className='result';$('#udpRes').className='result';
+  $('#tcpRes').textContent='Mom receives: …';$('#udpRes').textContent='Mom receives: …';
+  $('#raceScore').textContent='';
+  let finished=0;const fin=()=>{if(++finished===2)$('#raceScore').textContent=`Messages on the wire: TCP ${T.wire} · UDP ${U.wire}`};
+  play($('#tcpSeq'),T.steps,tok,()=>{const r=$('#tcpRes');r.className='result ok';r.textContent=`Mom receives: "${T.got.join(' ')}" ✅ complete, in order (but slower)`;fin()});
+  play($('#udpSeq'),U.steps,tok,()=>{
+    const r=$('#udpRes');const ok=U.got.join(' ')===WORDS.join(' ');
+    r.className='result '+(ok?'ok':'meh');
+    r.textContent=ok?`Mom receives: "${U.got.join(' ')}" ✅ lucky this time!`:`Mom receives: "${U.got.join(' ')||'(nothing!)'}" 🤨 ${U.got.length}/5 words`;
+    fin();
+  });
+});
+
+const SCN=[
+  ['Video call with your family','UDP','A frame from 2 seconds ago is useless. Speed beats perfection; a tiny glitch is fine.'],
+  ['Bank transfer of 5,000 SAR','TCP','Every byte must arrive exactly once and in order. No "approximately transferred".'],
+  ['DNS lookup: "what is the IP of this website?"','UDP','One tiny question, one tiny answer. If it gets lost, just ask again.'],
+  ['Downloading your thesis PDF','TCP','One missing byte and the file is corrupted.'],
+  ['Online multiplayer game','UDP','Old position updates are worthless; just send the newest one.'],
+  ['Sending an email','TCP','SMTP runs on TCP. Your supervisor should receive the whole sentence.'],
+  ['Loading a website over HTTP/3','UDP','Trick question! HTTP/3 uses QUIC, which adds its own reliability on top of UDP.']
+];
+let gs=0,gt=0;
+SCN.forEach(([q,ans,why])=>{
+  const d=document.createElement('div');d.className='scn';
+  d.innerHTML=`<span class="q">${q}</span><span class="pick"><button>TCP</button><button>UDP</button></span>`;
+  $$('button',d).forEach(b=>b.addEventListener('click',()=>{
+    if(d.dataset.done)return;d.dataset.done=1;gt++;
+    const right=b.textContent===ans;if(right)gs++;
+    d.classList.add(right?'right':'wrong');
+    const w=document.createElement('span');w.className='why';w.textContent=(right?'✅ ':'❌ It\'s '+ans+'. ')+why;d.appendChild(w);
+    $('#gameScore').textContent=`Score ${gs} / ${gt}`;
+  }));
+  $('#game').appendChild(d);
+});
+
+/* ---------- SUBNET ---------- */
+const ipToInt=s=>{const p=s.trim().split('.');if(p.length!==4)return null;let n=0;for(const x of p){if(!/^\d{1,3}$/.test(x)||+x>255)return null;n=n*256+(+x)}return n>>>0};
+const intToIp=n=>[n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+function subnet(){
+  const n=+$('#snCidr').value;$('#snCidrV').textContent='/'+n;
+  const ip=ipToInt($('#snIp').value);
+  $('#snErr').hidden=ip!==null;
+  if(ip===null){$('#snBits').innerHTML='';$('#snOut').innerHTML='';$('#snMagic').textContent='';return}
+  const mask=(0xFFFFFFFF<<(32-n))>>>0, net=(ip&mask)>>>0, bc=(net|(~mask>>>0))>>>0;
+  let html='';
+  for(let o=0;o<4;o++){
+    html+='<span class="octet">';
+    for(let b=0;b<8;b++){const i=o*8+b;const bit=(ip>>>(31-i))&1;html+=`<span class="bit ${i<n?'n':'h'}">${bit}</span>`}
+    html+=`</span>`;
+  }
+  $('#snBits').innerHTML=html;
+  const hosts=Math.pow(2,32-n)-2;
+  const cells=[['Subnet mask',intToIp(mask)],['Network address',intToIp(net)+'/'+n],['Broadcast',intToIp(bc)],['First host',intToIp(net+1)],['Last host',intToIp(bc-1)],['Usable hosts',hosts.toLocaleString('en')]];
+  $('#snOut').innerHTML=cells.map(([k,v])=>`<div><small>${k}</small><span class="mono">${v}</span></div>`).join('');
+  if(n%8===0){$('#snMagic').textContent=`/${n} ends exactly on an octet boundary, so the mask is all 255s and 0s. Easy mode.`}
+  else{
+    const oi=Math.floor(n/8),mo=(mask>>>(24-oi*8))&255,blk=256-mo,val=(ip>>>(24-oi*8))&255;
+    const ord=['1st','2nd','3rd','4th'][oi];
+    $('#snMagic').innerHTML=`Shortcut: the interesting octet is the <b>${ord}</b> (mask ${mo}). Block size = 256 − ${mo} = <b>${blk}</b>. Subnets start at 0, ${blk}, ${blk*2}, … and ${val} falls in the block starting at <b>${Math.floor(val/blk)*blk}</b>.`;
+  }
+}
+$('#snIp').addEventListener('input',subnet);$('#snCidr').addEventListener('input',subnet);subnet();
+
+let slices=4;
+const SL=[1,2,4,8,16];
+SL.forEach(k=>{const b=document.createElement('button');b.textContent=k===1?'whole':k+' slices';b.dataset.k=k;b.addEventListener('click',()=>{slices=k;pizza()});$('#pizzaBtns').appendChild(b)});
+function pizza(){
+  $$('#pizzaBtns button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.k===slices));
+  const svg=$('#pizzaSvg');svg.innerHTML='';
+  const c=110,r=100,fills=['#FFFFFF','var(--blue-soft)'];
+  if(slices===1){sv('circle',{cx:c,cy:c,r,fill:'var(--blue-soft)',stroke:'var(--blue)','stroke-width':3},svg)}
+  else for(let i=0;i<slices;i++){
+    const a0=i/slices*2*Math.PI-Math.PI/2,a1=(i+1)/slices*2*Math.PI-Math.PI/2;
+    const p=(a)=>`${c+r*Math.cos(a)},${c+r*Math.sin(a)}`;
+    sv('path',{d:`M${c},${c} L${p(a0)} A${r},${r} 0 ${a1-a0>Math.PI?1:0} 1 ${p(a1)} Z`,fill:fills[i%2],stroke:'var(--blue)','stroke-width':2,'stroke-linejoin':'round'},svg);
+    const am=(a0+a1)/2,t=sv('text',{x:c+r*.68*Math.cos(am),y:c+r*.68*Math.sin(am),'text-anchor':'middle','dominant-baseline':'central','font-family':'var(--display)','font-weight':800,'font-size':slices>8?13:17,fill:'var(--ink)'},svg);t.textContent=i+1;
+  }
+  // pepperoni
+  [[80,70],[140,90],[95,140],[150,150],[60,115]].forEach(([x,y])=>sv('circle',{cx:x,cy:y,r:7,fill:'var(--pink)',opacity:.55},svg));
+  const borrow=Math.log2(slices),pre=24+borrow,size=256/slices;
+  $('#pizzaSum').innerHTML=slices===1?'One /24: 256 addresses, 254 usable hosts. Everyone fights over it.':`Borrowed <b>${borrow}</b> host bit${borrow>1?'s':''} → <b>${slices}</b> subnets of <b>/${pre}</b>, each ${size} addresses (<b>${size-2}</b> usable). Mask: 255.255.255.${256-size}.`;
+  let li='';
+  for(let i=0;i<slices;i++){
+    const s=i*size;
+    li+=`<li><b>${i+1}</b><span class="mono">192.168.10.${s}/${pre} · hosts .${s+1}–.${s+size-2} · bcast .${s+size-1}</span></li>`;
+  }
+  $('#pizzaList').innerHTML=li;
+}
+pizza();
+
+/* ---------- NAT ---------- */
+const DEV=[{n:'📱 Phone',ip:'192.168.1.5'},{n:'💻 Laptop',ip:'192.168.1.7'},{n:'📺 TV',ip:'192.168.1.9'}];
+const PUB='203.0.113.7',SRV='198.51.100.20:443';
+let natRows=[],nextPort=62001,natTok=0;
+function natSteps(arr,drop){
+  const tok=++natTok;
+  $$('#natSteps .st').forEach((st,i)=>{st.classList.remove('on','drop');$('.lbl',st).textContent=arr[i][0];$('.mono',st).innerHTML=arr[i][1]});
+  $$('#natSteps .st').forEach((st,i)=>setTimeout(()=>{if(tok!==natTok)return;st.classList.add('on');if(drop&&i>=drop)st.classList.add('drop')},reduce?0:i*650));
+}
+function natTable(hl,cls){
+  if(!natRows.length)return;
+  $('#natTable').innerHTML=natRows.map((r,i)=>`<tr class="${i===hl?cls:''}"><td>${r.in}</td><td>${r.out}</td><td>${SRV}</td></tr>`).join('');
+}
+$$('[data-dev]').forEach(b=>b.addEventListener('click',()=>{
+  const d=DEV[+b.dataset.dev];
+  const sp=49152+Math.floor(Math.random()*16000), pp=nextPort++;
+  const inS=`${d.ip}:${sp}`, outS=`${PUB}:${pp}`;
+  natRows.push({in:inS,out:outS});
+  const idx=natRows.length-1;
+  natSteps([
+    ['1 · Leaves the '+d.n.split(' ')[1].toLowerCase(),`src ${inS}<br>dst ${SRV}`],
+    ['2 · Router rewrites source',`src <span class="chg">${outS}</span><br>dst ${SRV}<br>📒 writes: ${pp} ↔ ${inS}`],
+    ['3 · Reply arrives at router',`src ${SRV}<br>dst ${outS}<br>📒 looks up port ${pp}… found!`],
+    ['4 · Router rewrites destination',`src ${SRV}<br>dst <span class="chg">${inS}</span><br>✅ delivered to ${d.n}`]
+  ]);
+  natTable(idx,'new');
+  setTimeout(()=>natTable(idx,'used'),reduce?0:2000);
+}));
+$('#natStranger').addEventListener('click',()=>{
+  natSteps([
+    ['1 · Stranger sends a packet','src 192.0.2.66:31337<br>dst '+PUB+':40000'],
+    ['2 · Arrives at router','📒 looks up port 40000…'],
+    ['3 · No table entry','Nobody inside asked for this. 🤨'],
+    ['4 · Dropped 🗑️','Need port forwarding to let it in.']
+  ],2);
+});
+
+/* ---------- graph helpers ---------- */
+function drawEdge(g,A,B,R,opt){
+  const dx=B.x-A.x,dy=B.y-A.y,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L;
+  let cx=(A.x+B.x)/2,cy=(A.y+B.y)/2;
+  if(opt.curve){cx+=-uy*opt.curve;cy+=ux*opt.curve}
+  const sxv=cx-A.x,syv=cy-A.y,sl=Math.hypot(sxv,syv),exv=B.x-cx,eyv=B.y-cy,el=Math.hypot(exv,eyv);
+  const sx=A.x+sxv/sl*R,sy=A.y+syv/sl*R,ex=B.x-exv/el*(R+(opt.arrow?6:0)),ey=B.y-eyv/el*(R+(opt.arrow?6:0));
+  const attrs={d:`M${sx},${sy} Q${cx},${cy} ${ex},${ey}`};
+  if(opt.arrow)attrs['marker-end']=`url(#${opt.arrow})`;
+  sv('path',attrs,g);
+  const t=opt.t??.5,lx=(1-t)*(1-t)*sx+2*(1-t)*t*cx+t*t*ex,ly=(1-t)*(1-t)*sy+2*(1-t)*t*cy+t*t*ey;
+  const w=String(opt.label).length*9+12;
+  sv('rect',{x:lx-w/2,y:ly-11,width:w,height:22,rx:6},g);
+  sv('text',{x:lx,y:ly},g).textContent=opt.label;
+}
+function drawNode(svg,n,cls,distTxt,showName){
+  const g=sv('g',{class:'n '+cls},svg);
+  sv('circle',{cx:n.x,cy:n.y,r:26},g);
+  if(n.icon)sv('text',{x:n.x,y:n.y,class:'emo'},g).textContent=n.icon;
+  else sv('text',{x:n.x,y:n.y+1,class:'lettr'},g).textContent=n.id;
+  if(showName)sv('text',{x:n.x,y:n.y+46,class:'nm'},g).textContent=n.name;
+  const db=sv('g',{class:'db'},g);const w=Math.max(30,String(distTxt).length*9+14);
+  sv('rect',{x:n.x-w/2,y:n.y-52,width:w,height:20,rx:10},db);
+  sv('text',{x:n.x,y:n.y-42},db).textContent=distTxt;
+}
+
+/* ---------- DIJKSTRA ---------- */
+const DN=[{id:'H',name:'Home',icon:'🏠',x:60,y:170},{id:'B',name:'Bakery',icon:'🥐',x:210,y:70},{id:'C',name:'Coffee',icon:'☕',x:210,y:270},{id:'M',name:'Mall',icon:'🛍️',x:380,y:170},{id:'U',name:'University',icon:'🎓',x:540,y:270},{id:'O',name:'Office',icon:'💼',x:580,y:70}];
+const DE0=[['H','B',4],['H','C',2],['C','B',1],['B','M',5],['C','M',8],['C','U',10],['M','U',2],['M','O',6],['U','O',3]];
+let DE=DE0.map(e=>[...e]),jam=new Set(),djSteps=[],djI=0;
+const dnode=id=>DN.find(n=>n.id===id),dname=id=>dnode(id).name;
+DN.forEach(n=>{['djSrc','djDst'].forEach(s=>{const o=document.createElement('option');o.value=n.id;o.textContent=n.icon+' '+n.name;$('#'+s).appendChild(o)})});
+$('#djSrc').value='H';$('#djDst').value='O';
+function djCompute(){
+  const src=$('#djSrc').value,dst=$('#djDst').value;
+  const dist={},prev={},vis=new Set();DN.forEach(n=>{dist[n.id]=Infinity;prev[n.id]=null});dist[src]=0;
+  const snap=(o)=>({dist:{...dist},prev:{...prev},vis:new Set(vis),...o});
+  djSteps=[snap({cur:null,relaxed:[],changed:[],msg:`Start: ${dname(src)} = 0 minutes, every other place = ∞ (we know nothing yet!). Press <b>Next step</b>.`})];
+  while(true){
+    let u=null;DN.forEach(n=>{if(!vis.has(n.id)&&dist[n.id]<Infinity&&(u===null||dist[n.id]<dist[u]))u=n.id});
+    if(u===null)break;
+    vis.add(u);const relaxed=[],changed=[],notes=[];
+    DE.forEach(([a,b,w],i)=>{
+      let v=null;if(a===u)v=b;else if(b===u)v=a;if(!v||vis.has(v))return;
+      const nd=dist[u]+w;
+      if(nd<dist[v]){notes.push(`${dname(v)}: ${fmt(dist[v])} → <b>${nd}</b>`);dist[v]=nd;prev[v]=u;relaxed.push(i);changed.push(v)}
+      else notes.push(`${dname(v)}: ${dist[u]}+${w}=${nd} is not better than ${dist[v]}`);
+    });
+    djSteps.push(snap({cur:u,relaxed,changed,msg:`Settle <b>${dname(u)}</b> (closest unsettled, ${dist[u]} min). ${notes.length?'Check roads: '+notes.join(' · '):'No unsettled neighbors.'}`}));
+  }
+  // final path
+  const path=[];let x=dst;while(x){path.unshift(x);x=prev[x]}
+  const ok=path[0]===src;
+  djSteps.push(snap({cur:null,relaxed:[],changed:[],path:ok?path:[],msg:ok?`🏁 Done! Fastest ${dname(src)} → ${dname(dst)}: <b>${path.map(dname).join(' → ')}</b> = <b>${dist[dst]} min</b>.`:'No route.'}));
+  djI=0;djRender();
+}
+function djRender(){
+  const s=djSteps[djI],svg=$('#djSvg');svg.innerHTML='';
+  const src=$('#djSrc').value;
+  const pathEdges=new Set();if(s.path)for(let i=0;i<s.path.length-1;i++)pathEdges.add([s.path[i],s.path[i+1]].sort().join());
+  DE.forEach(([a,b,w],i)=>{
+    const key=[a,b].sort().join();
+    let cls='e';
+    if(pathEdges.has(key))cls+=' path';
+    else if(s.relaxed.includes(i))cls+=' relaxed';
+    else if((s.prev[b]===a&&s.vis.has(b))||(s.prev[a]===b&&s.vis.has(a)))cls+=' tree';
+    if(jam.has(i))cls+=' jam';
+    const g=sv('g',{class:cls},svg);
+    drawEdge(g,dnode(a),dnode(b),26,{label:jam.has(i)?w+'🚧':w});
+  });
+  DN.forEach(n=>{
+    let cls=s.cur===n.id?'cur':s.vis.has(n.id)?'visited':'';
+    if(n.id===src)cls+=' src';if(s.changed.includes(n.id))cls+=' changed';
+    drawNode(svg,n,cls,fmt(s.dist[n.id]),true);
+  });
+  $('#djTable').innerHTML=DN.map(n=>`<tr class="${s.cur===n.id?'cur':s.changed.includes(n.id)?'chg':''} ${s.vis.has(n.id)?'vis':''}"><td>${n.icon} ${n.name}</td><td>${fmt(s.dist[n.id])}</td><td>${s.prev[n.id]?dname(s.prev[n.id]):'—'}</td></tr>`).join('');
+  $('#djMsg').innerHTML=s.msg;
+  $('#djNext').disabled=djI>=djSteps.length-1;
+}
+$('#djNext').addEventListener('click',()=>{if(djI<djSteps.length-1){djI++;djRender()}});
+$('#djAll').addEventListener('click',()=>{djI=djSteps.length-1;djRender()});
+$('#djReset').addEventListener('click',()=>{DE=DE0.map(e=>[...e]);jam.clear();djCompute()});
+$('#djSrc').addEventListener('change',djCompute);$('#djDst').addEventListener('change',djCompute);
+$('#djJam').addEventListener('click',()=>{
+  const idx=[...DE.keys()].filter(i=>!jam.has(i));
+  for(let k=0;k<2&&idx.length;k++){const i=idx.splice(Math.floor(Math.random()*idx.length),1)[0];DE[i][2]+=4+Math.floor(Math.random()*4);jam.add(i)}
+  djCompute();
+  $('#djMsg').innerHTML='🚧 Traffic jam! Two roads got slower. Real link-state routers flood this change to everyone, and everyone reruns Dijkstra. Press <b>Next step</b>.';
+});
+djCompute();
+
+/* ---------- BELLMAN-FORD ---------- */
+const BN=[{id:'S',name:'Start',x:60,y:170},{id:'A',name:'A',x:230,y:70},{id:'C',name:'C',x:230,y:270},{id:'B',name:'B',x:430,y:70},{id:'D',name:'D',x:430,y:270}];
+const bnode=id=>BN.find(n=>n.id===id);
+function bfEdges(glitch){
+  return [['A','B',5,{curve:-16}],['A','C',8,{}],['A','D',-4,{t:.32}],['B','A',glitch?-4:-2,{curve:-16}],['C','B',-3,{t:.32}],['C','D',9,{}],['D','B',7,{}],['D','S',2,{}],['S','A',6,{}],['S','C',7,{}]];
+}
+let BE=bfEdges(false),bfSteps=[],bfI=0;
+function bfCompute(){
+  BE=bfEdges($('#bfGlitch').checked);
+  const dist={},prev={};BN.forEach(n=>{dist[n.id]=Infinity;prev[n.id]=null});dist.S=0;
+  const snap=o=>({dist:{...dist},prev:{...prev},...o});
+  bfSteps=[snap({round:0,edge:-1,better:false,changed:null,msg:'Start = 0, everyone else = ∞. Each round we check <b>all 10 edges</b> in the same order. With V = 5 nodes we need up to <b>4 rounds</b>.'})];
+  const V=BN.length;let stopped=false;
+  for(let r=1;r<V;r++){
+    let any=false;
+    BE.forEach(([u,v,w],i)=>{
+      let msg,better=false;
+      if(dist[u]===Infinity)msg=`${u}→${v} (${w}): ${u} is still ∞, nothing to share yet.`;
+      else{const nd=dist[u]+w;
+        if(nd<dist[v]){msg=`${u}→${v} (${w}): ${dist[u]} + (${w}) = <b>${nd}</b> beats ${fmt(dist[v])}. Update ${v}! 🎉`;dist[v]=nd;prev[v]=u;better=true;any=true}
+        else msg=`${u}→${v} (${w}): ${dist[u]} + (${w}) = ${nd}, not better than ${dist[v]}.`}
+      bfSteps.push(snap({round:r,edge:i,better,changed:better?v:null,msg}));
+    });
+    if(!any){bfSteps.push(snap({round:r,edge:-1,better:false,changed:null,msg:`Round ${r} changed nothing, so nothing will ever change again. We can stop early. ✅ Final cheapest costs are in the table.`}));stopped=true;break}
+  }
+  if(!stopped||true){
+    let cyc=null;
+    for(const [u,v,w] of BE){if(dist[u]!==Infinity&&dist[u]+w<dist[v]){cyc=[u,v,w];break}}
+    if(!stopped){
+      bfSteps.push(snap({round:'check',edge:cyc?BE.findIndex(e=>e[0]===cyc[0]&&e[1]===cyc[1]):-1,better:!!cyc,changed:null,alarm:!!cyc,
+        msg:cyc?`🚨 Extra round ${V}: edge ${cyc[0]}→${cyc[1]} can <i>still</i> lower the cost. That's a <b>negative cycle</b> (A → D → B → A = −4 + 7 − 4 = −1 per lap). Infinite cashback, so "cheapest" has no answer.`
+               :`✅ Extra round ${V}: no edge can improve anything, so there is no negative cycle. Final costs are in the table.`}));
+    }
+  }
+  bfI=0;bfRender();
+}
+function bfRender(){
+  const s=bfSteps[bfI],svg=$('#bfSvg');svg.innerHTML='';
+  const defs=sv('defs',{},svg);
+  [['ah','var(--line)'],['ahc','var(--pink)'],['ahb','var(--blue)']].forEach(([id,f])=>{const m=sv('marker',{id,viewBox:'0 0 10 10',refX:6,refY:5,markerWidth:5,markerHeight:5,orient:'auto-start-reverse'},defs);sv('path',{d:'M0,0 L10,5 L0,10 z',fill:f},m)});
+  BE.forEach(([u,v,w,o],i)=>{
+    const cur=i===s.edge;
+    const g=sv('g',{class:'e'+(w<0?' neg':'')+(cur?' cur':'')+(cur&&s.better?' better':'')},svg);
+    drawEdge(g,bnode(u),bnode(v),26,{...o,label:w,arrow:cur?(s.better?'ahb':'ahc'):'ah'});
+  });
+  BN.forEach(n=>drawNode(svg,n,(n.id==='S'?'src ':'')+(s.changed===n.id?'changed':''),fmt(s.dist[n.id]),false));
+  $('#bfTable').innerHTML=BN.map(n=>`<tr class="${s.changed===n.id?'chg':''}"><td>${n.id}${n.id==='S'?' (start)':''}</td><td>${fmt(s.dist[n.id])}</td><td>${s.prev[n.id]||'—'}</td></tr>`).join('');
+  $('#bfEdges').innerHTML=BE.map(([u,v,w],i)=>`<span class="${i===s.edge?'cur'+(s.better?' better':''):''}">${u}→${v} ${w}</span>`).join('');
+  $('#bfRoundLbl').textContent=s.round===0?'Round 0 · setup':s.round==='check'?'Extra round · negative-cycle check':`Round ${s.round} of 4 · edge ${s.edge>=0?s.edge+1:'—'} of 10`;
+  const m=$('#bfMsg');m.innerHTML=s.msg;m.classList.toggle('alarm',!!s.alarm);
+  const end=bfI>=bfSteps.length-1;$('#bfNext').disabled=end;$('#bfRound').disabled=end;$('#bfAll').disabled=end;
+}
+$('#bfNext').addEventListener('click',()=>{if(bfI<bfSteps.length-1){bfI++;bfRender()}});
+$('#bfAll').addEventListener('click',()=>{bfI=bfSteps.length-1;bfRender()});
+$('#bfRound').addEventListener('click',()=>{
+  let j=bfI+1;if(j>=bfSteps.length)return;
+  const target=bfSteps[j].round;
+  while(j<bfSteps.length-1&&bfSteps[j+1].round===target&&bfSteps[j+1].edge!==-1)j++;
+  bfI=j;bfRender();
+});
+$('#bfReset').addEventListener('click',bfCompute);
+$('#bfGlitch').addEventListener('change',bfCompute);
+bfCompute();
+</script>
